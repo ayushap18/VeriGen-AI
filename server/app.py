@@ -28,7 +28,7 @@ env = DataCleaningEnvironment()
 
 
 class ResetRequest(BaseModel):
-    task_id: str
+    task_id: str = "fix_dates_and_nulls"
 
 
 class StepRequest(BaseModel):

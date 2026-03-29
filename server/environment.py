@@ -187,5 +187,6 @@ class DataCleaningEnvironment:
             max_steps=self.max_steps,
             last_action_success=self.last_action_success,
             last_action_message=self.last_action_message,
-            score=self._compute_score()
+            score=self._compute_score(),
+            done=self.done
         )

@@ -46,6 +46,7 @@ class Observation(BaseModel):
     last_action_success: bool = Field(default=True, description="Whether last action succeeded")
     last_action_message: str = Field(default="", description="Feedback message from last action")
     score: float = Field(default=0.0, description="Current score (0.0 - 1.0)")
+    done: bool = Field(default=False, description="Whether the episode is finished")
 
 
 class State(BaseModel):
