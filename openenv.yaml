@@ -1,0 +1,25 @@
+name: data-cleaning-agent
+description: >
+  A real-world data cleaning and validation environment where an AI agent
+  must detect and fix errors in messy tabular datasets. Tasks include fixing
+  malformed dates, removing duplicate rows, correcting inconsistent categories,
+  handling missing values, and validating data types. The agent receives a
+  dirty dataset and must produce a clean version that matches the ground truth.
+version: "1.0.0"
+authors:
+  - Codecatalysts
+tags:
+  - data-cleaning
+  - data-validation
+  - tabular-data
+  - real-world
+tasks:
+  - id: fix_dates_and_nulls
+    difficulty: easy
+    description: Fix malformed date formats and handle missing values in a small customer dataset.
+  - id: dedup_and_normalize
+    difficulty: medium
+    description: Remove duplicate rows and normalize inconsistent category names in a product dataset.
+  - id: full_pipeline_clean
+    difficulty: hard
+    description: Perform end-to-end cleaning — fix types, dates, duplicates, missing values, and outliers in a sales dataset.
