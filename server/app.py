@@ -9,7 +9,7 @@ import os
 # Add parent directory to path so we can import models and tasks
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import Optional
 
@@ -50,10 +50,11 @@ def root():
 
 
 @app.post("/reset", response_model=Observation)
-def reset(request: ResetRequest):
+def reset(request: Optional[ResetRequest] = Body(default=None)):
     """Reset the environment to a specific task."""
     try:
-        observation = env.reset(request.task_id)
+        task_id = request.task_id if request else "fix_dates_and_nulls"
+        observation = env.reset(task_id)
         return observation
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
