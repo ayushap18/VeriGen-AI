@@ -1,29 +1,38 @@
 """
 FastAPI server for the Data Cleaning Environment.
-Exposes reset(), step(), and state() endpoints per OpenEnv spec.
+Exposes reset, step, state, hints, validate, undo, episodes, generate, and health endpoints.
 """
 
 import sys
 import os
+import time
 
-# Add parent directory to path so we can import models and tasks
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, HTTPException, Body
 from pydantic import BaseModel
 from typing import Optional
 
-from models import Action, Observation, State
+from models import (
+    Action, Observation, State,
+    HintResponse, ValidateResponse, EpisodeRecord,
+    GenerateTaskRequest
+)
 from server.environment import DataCleaningEnvironment
 from tasks.task_data import TASKS
 
+_start_time = time.time()
+
 app = FastAPI(
     title="Data Cleaning Environment",
-    description="An OpenEnv-compliant environment for training AI agents to clean messy datasets.",
-    version="1.0.0"
+    description=(
+        "An OpenEnv-compliant environment for training AI agents to clean messy datasets. "
+        "Features dynamic task generation, error detection hints, undo/redo, validation, "
+        "and multi-episode tracking."
+    ),
+    version="2.0.0"
 )
 
-# Single environment instance
 env = DataCleaningEnvironment()
 
 
@@ -40,29 +49,49 @@ class StepRequest(BaseModel):
 
 @app.get("/")
 def root():
-    """Health check endpoint."""
     return {
         "status": "ok",
         "environment": "data-cleaning-agent",
-        "version": "1.0.0",
-        "available_tasks": list(TASKS.keys())
+        "version": "2.0.0",
+        "available_tasks": list(TASKS.keys()),
+        "features": ["dynamic_generation", "hints", "undo", "validation", "episodes"]
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "version": "2.0.0",
+        "uptime_seconds": round(time.time() - _start_time, 2),
+        "available_tasks": list(TASKS.keys()),
+        "endpoints": [
+            "GET /", "GET /health", "GET /tasks",
+            "POST /reset", "POST /step", "GET /state",
+            "GET /hints", "GET /validate", "POST /undo",
+            "GET /episodes", "POST /generate"
+        ],
+        "features": {
+            "dynamic_generation": True,
+            "error_hints": True,
+            "undo_redo": True,
+            "validation": True,
+            "episode_tracking": True,
+        }
     }
 
 
 @app.post("/reset", response_model=Observation)
 def reset(request: Optional[ResetRequest] = Body(default=None)):
-    """Reset the environment to a specific task."""
     try:
         task_id = request.task_id if request else "fix_dates_and_nulls"
-        observation = env.reset(task_id)
-        return observation
+        return env.reset(task_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/step", response_model=Observation)
 def step(request: StepRequest):
-    """Take an action in the environment."""
     try:
         action = Action(
             action_type=request.action_type,
@@ -70,15 +99,13 @@ def step(request: StepRequest):
             column_name=request.column_name,
             new_value=request.new_value
         )
-        observation = env.step(action)
-        return observation
+        return env.step(action)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/state", response_model=State)
 def state():
-    """Get the full current state of the environment."""
     try:
         return env.get_state()
     except Exception as e:
@@ -87,7 +114,6 @@ def state():
 
 @app.get("/tasks")
 def list_tasks():
-    """List all available tasks with metadata."""
     return {
         task_id: {
             "difficulty": task["difficulty"],
@@ -98,6 +124,50 @@ def list_tasks():
         }
         for task_id, task in TASKS.items()
     }
+
+
+@app.get("/hints", response_model=HintResponse)
+def hints():
+    try:
+        error_hints = env.detect_errors()
+        return HintResponse(total_errors=len(error_hints), hints=error_hints)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/validate", response_model=ValidateResponse)
+def validate():
+    try:
+        return env.validate()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/undo", response_model=Observation)
+def undo():
+    try:
+        return env.undo()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/episodes", response_model=list[EpisodeRecord])
+def episodes():
+    return env.get_episodes()
+
+
+@app.post("/generate", response_model=Observation)
+def generate(request: Optional[GenerateTaskRequest] = Body(default=None)):
+    try:
+        req = request or GenerateTaskRequest()
+        return env.reset_generated(
+            num_rows=req.num_rows,
+            difficulty=req.difficulty,
+            seed=req.seed,
+            error_types=req.error_types
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 def main():

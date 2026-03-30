@@ -1,11 +1,13 @@
 name: data-cleaning-agent
 description: >
-  A real-world data cleaning and validation environment where an AI agent
-  must detect and fix errors in messy tabular datasets. Tasks include fixing
-  malformed dates, removing duplicate rows, correcting inconsistent categories,
-  handling missing values, and validating data types. The agent receives a
-  dirty dataset and must produce a clean version that matches the ground truth.
-version: "1.0.0"
+  A production-grade data cleaning and validation environment where AI agents
+  learn to detect and fix errors in messy tabular datasets. Features dynamic
+  task generation with procedural error injection, intelligent error detection
+  with severity-ranked hints, undo/redo support, dataset validation, and
+  multi-episode performance tracking. Tasks include fixing malformed dates,
+  removing duplicates, correcting inconsistent categories, handling missing
+  values, fixing type errors, and validating computed fields.
+version: "2.0.0"
 authors:
   - Codecatalysts
 tags:
@@ -13,6 +15,8 @@ tags:
   - data-validation
   - tabular-data
   - real-world
+  - dynamic-generation
+  - error-detection
 tasks:
   - id: fix_dates_and_nulls
     difficulty: easy
@@ -23,3 +27,37 @@ tasks:
   - id: full_pipeline_clean
     difficulty: hard
     description: Perform end-to-end cleaning — fix types, dates, duplicates, missing values, and outliers in a sales dataset.
+  - id: dynamic
+    difficulty: configurable
+    description: Procedurally generated tasks with configurable size (10-500 rows), difficulty, and error types.
+endpoints:
+  - path: /reset
+    method: POST
+    description: Reset to a curated task (accepts empty body for default task)
+  - path: /step
+    method: POST
+    description: Take a cleaning action
+  - path: /state
+    method: GET
+    description: Get full environment state
+  - path: /tasks
+    method: GET
+    description: List available curated tasks
+  - path: /hints
+    method: GET
+    description: Detect errors and return severity-ranked hints
+  - path: /validate
+    method: GET
+    description: Validate current dataset against expected types
+  - path: /undo
+    method: POST
+    description: Undo the last action
+  - path: /episodes
+    method: GET
+    description: Get multi-episode performance history
+  - path: /generate
+    method: POST
+    description: Generate a dynamic task with procedural error injection
+  - path: /health
+    method: GET
+    description: Detailed health check with capabilities
