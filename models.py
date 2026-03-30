@@ -60,3 +60,56 @@ class State(BaseModel):
     max_steps: int
     done: bool
     score: float
+
+
+class HintItem(BaseModel):
+    """A single detected error/hint."""
+    row_index: int
+    column_name: str
+    error_type: str
+    severity: str = Field(description="low, medium, or high")
+    description: str
+    suggested_action: str
+
+
+class HintResponse(BaseModel):
+    """Response from the /hints endpoint."""
+    total_errors: int
+    hints: list[HintItem]
+
+
+class ValidateResponse(BaseModel):
+    """Response from the /validate endpoint."""
+    is_valid: bool
+    errors: list[str]
+    score: float
+    error_breakdown: dict[str, int]
+
+
+class ErrorTypeStats(BaseModel):
+    """Score breakdown by error type."""
+    date_errors: float = 0.0
+    null_errors: float = 0.0
+    duplicate_errors: float = 0.0
+    category_errors: float = 0.0
+    type_errors: float = 0.0
+    computed_errors: float = 0.0
+
+
+class EpisodeRecord(BaseModel):
+    """Record of a completed episode."""
+    episode_id: str
+    task_id: str
+    steps_taken: int
+    max_steps: int
+    final_score: float
+    actions_log: list[dict]
+    error_type_scores: dict[str, float]
+
+
+class GenerateTaskRequest(BaseModel):
+    """Request to generate a dynamic task."""
+    num_rows: int = Field(default=50, ge=10, le=500)
+    difficulty: str = Field(default="medium")
+    seed: Optional[int] = None
+    error_types: Optional[list[str]] = None
