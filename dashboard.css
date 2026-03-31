@@ -1,0 +1,42 @@
+/* VeriGen-AI Bloomberg/Grafana Dark Theme */
+
+Screen {
+    background: #0a0a0f;
+}
+
+/* Generic panel styling */
+.panel {
+    border: solid #2a2a4a;
+    background: #0f0f1a;
+    padding: 0 1;
+}
+
+/* DataTable styling */
+DataTable {
+    background: #0f0f1a;
+}
+
+DataTable > .datatable--header {
+    background: #1a1a2e;
+    color: #00d4ff;
+    text-style: bold;
+}
+
+DataTable > .datatable--cursor {
+    background: #1a1a3e;
+}
+
+/* Footer */
+Footer {
+    background: #1a1a2e;
+}
+
+FooterKey {
+    background: #1a1a2e;
+    color: #6666aa;
+}
+
+/* Rule lines */
+Rule {
+    color: #2a2a4a;
+}
