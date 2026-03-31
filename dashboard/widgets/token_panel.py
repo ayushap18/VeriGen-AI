@@ -1,30 +1,34 @@
-"""Token usage and cost panel."""
+"""Token usage and cost panel — Bloomberg style."""
 
-from textual.app import ComposeResult
-from textual.widget import Widget
 from textual.widgets import Static
 
 
-class TokenPanel(Widget):
+class TokenPanel(Static):
     DEFAULT_CSS = """
     TokenPanel {
-        height: 5;
-        border: solid #2a2a4a;
-        background: #0f0f1a;
+        height: 7;
+        border: solid #1a3a1a;
+        background: #050a05;
         padding: 0 1;
     }
     """
 
-    def compose(self) -> ComposeResult:
-        yield Static("[#6666aa]TOKENS[/#6666aa]", id="tok-label")
-        yield Static("[#00d4ff]In: 0[/#00d4ff]  [#ffaa00]Out: 0[/#ffaa00]", id="tok-in")
-        yield Static("[#00ff88]Cost: $0.0000[/#00ff88]", id="tok-cost")
+    def __init__(self):
+        super().__init__(self._build(0, 0, 0.0))
+
+    def _build(self, tin: int, tout: int, cost: float) -> str:
+        total = tin + tout
+        ratio = tin / max(total, 1) * 20
+        bar_in = "[#00d4ff]\u2588[/#00d4ff]" * int(ratio)
+        bar_out = "[#ffaa00]\u2588[/#ffaa00]" * (20 - int(ratio))
+
+        return (
+            f"[#00ff88 bold]\u25c9 TOKENS[/#00ff88 bold]\n"
+            f"[#3a6a3a]  In:[/#3a6a3a]   [#00d4ff]{tin:>10,}[/#00d4ff]\n"
+            f"[#3a6a3a]  Out:[/#3a6a3a]  [#ffaa00]{tout:>10,}[/#ffaa00]\n"
+            f"  {bar_in}{bar_out}\n"
+            f"[#3a6a3a]  Cost:[/#3a6a3a] [#00ff88 bold]${cost:.6f}[/#00ff88 bold]"
+        )
 
     def update_tokens(self, tokens_in: int, tokens_out: int, cost: float):
-        self.query_one("#tok-in", Static).update(
-            f"[#00d4ff]In: {tokens_in:,}[/#00d4ff]  "
-            f"[#ffaa00]Out: {tokens_out:,}[/#ffaa00]"
-        )
-        self.query_one("#tok-cost", Static).update(
-            f"[#00ff88]Cost: ${cost:.4f}[/#00ff88]"
-        )
+        self.update(self._build(tokens_in, tokens_out, cost))

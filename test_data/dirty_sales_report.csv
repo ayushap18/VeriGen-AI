@@ -1,0 +1,81 @@
+order_id,customer_name,email,order_date,ship_date,product_category,product_name,quantity,unit_price,total_amount,discount_pct,payment_method,shipping_city,shipping_country,is_returned,loyalty_member,rating
+1001,Alice Johnson,alice.johnson@gmail.com,2024-03-15,2024-03-18,Electronics,Wireless Mouse,2,29.99,59.98,0.0,Credit Card,New York,USA,false,true,4.5
+1002,Bob Smith,bob.smith@yahoo.com,15/03/2024,2024-03-20,ELECTRONICS,Mechanical Keyboard,1,89.99,89.99,5.0,PayPal,Los Angeles,USA,false,true,4.8
+1003,,charlie.doe@hotmail.com,2024-03-16,2024-03-19,Home & Garden,Plant Pot Set,3,15.50,46.50,0.0,Credit Card,Chicago,USA,false,false,3.9
+1004,Diana Prince,diana.prince@outlook.com,March 17 2024,2024-03-21,electronics,USB-C Hub,1,45.00,45.00,10.0,Debit Card,Houston,USA,false,TRUE,4.2
+1005,Eve Martinez,,2024-03-17,2024-03-22,Clothing,Winter Jacket,-1,120.00,120.00,15.0,Credit Card,Phoenix,USA,false,true,4.7
+1006,Frank Lee,frank.lee@gmail.com,2024/03/18,2024-03-23,Home & garden,Desk Lamp,2,35.00,70.00,0.0,PayPal,Philadelphia,USA,true,false,3.5
+1007,Grace Kim,grace.kim@company.com,2024-03-18,2024-03-24,Electronics,Bluetooth Speaker,1,75.00,999.00,0.0,Credit Card,San Antonio,USA,false,true,4.1
+1008,Henry Wilson,henry.w@email.com,2024-03-19,18-Mar-2024,clothing,Running Shoes,2,65.00,130.00,5.0,Debit Card,San Diego,USA,false,False,4.6
+1009,Ivy Chen,ivy.chen@gmail.com,2024-03-19,2024-03-25,Books,Python Programming,1,49.99,49.99,0.0,Credit Card,Dallas,USA,false,true,4.9
+1010,Jack Brown,jack.brown@yahoo.com,20-03-2024,2024-03-26,Electronics,Webcam HD,1,55.00,55.00,0.0,PayPal,San Jose,USA,false,true,
+1011,Alice Johnson,alice.johnson@gmail.com,2024-03-15,2024-03-18,Electronics,Wireless Mouse,2,29.99,59.98,0.0,Credit Card,New York,USA,false,true,4.5
+1012,Karen White,karen@email.com,2024-03-20,2024-03-27,Home & Garden,Scented Candle Set,5,12.99,64.95,0.0,Credit Card,Austin,USA,false,false,3.8
+1013,Leo Martinez,leo.m@outlook.com,2024-03-21,,CLOTHING,Denim Jeans,1,79.99,79.99,20.0,Debit Card,Jacksonville,USA,false,true,4.3
+1014,Mia Taylor,mia.taylor@gmail.com,2024.03.21,2024-03-28,Electronics,Power Bank 20000mAh,2,39.99,79.98,0.0,PayPal,San Francisco,USA,false,True,4.0
+1015,Noah Davis,noah.d@company.com,2024-03-22,2024-03-29,Books,Data Science Handbook,-3,59.99,179.97,0.0,Credit Card,Columbus,USA,false,true,4.4
+1016,Olivia Brown,olivia.b@email.com,2024-03-22,2024-03-30,home & garden,Indoor Plant Stand,1,42.50,42.50,0.0,Debit Card,Charlotte,USA,false,false,3.7
+1017,,sam.green@yahoo.com,23/March/2024,2024-04-01,Electronics,Gaming Mouse,1,95000.00,95000.00,0.0,Credit Card,Indianapolis,USA,false,true,4.6
+1018,Patricia Hall,patricia.h@gmail.com,2024-03-23,2024-04-02,Clothing,Silk Scarf,2,55.00,110.00,10.0,PayPal,Seattle,USA,true,TRUE,4.1
+1019,Quinn Adams,quinn.a@outlook.com,2024-03-24,2024-04-03,Electronics,HDMI Cable 6ft,3,12.99,38.97,0.0,Credit Card,Denver,USA,false,true,3.9
+1020,Rachel Lee,rachel.lee@email.com,24-Mar-2024,2024-04-04,BOOKS,Machine Learning A-Z,1,69.99,69.99,0.0,Debit Card,Washington,USA,false,false,4.8
+1021,Sam Green,sam.green@yahoo.com,2024-03-25,2024-04-05,Home & Garden,Tool Kit 120pc,-2,89.99,179.98,0.0,Credit Card,Boston,USA,false,true,4.2
+1022,Tina Wang,tina.w@company.com,2024-03-25,2024/04/06,ELECTRONICS,Monitor Stand,1,34.99,34.99,0.0,PayPal,Nashville,USA,false,False,3.6
+1023,Uma Patel,,2024-03-26,2024-04-07,Clothing,Yoga Pants,2,45.00,90.00,5.0,Credit Card,Baltimore,USA,false,true,4.5
+1024,Victor Hugo,victor.h@gmail.com,03/27/2024,2024-04-08,Electronics,Wireless Earbuds,1,129.99,129.99,0.0,Debit Card,Louisville,USA,false,true,4.7
+1025,Wendy Clark,wendy.c@outlook.com,2024-03-27,2024-04-09,home & GARDEN,Bird Feeder,1,28.50,28.50,0.0,Credit Card,Portland,USA,false,false,3.4
+1026,Xavier Ross,xavier.r@email.com,2024-03-28,2024-04-10,Books,Clean Code,1,44.99,44.99,0.0,PayPal,Milwaukee,USA,false,true,4.9
+1027,Yuki Tanaka,yuki.t@company.com,28/03/2024,2024-04-11,Electronics,USB Flash Drive 128GB,5,18.99,94.95,0.0,Credit Card,Las Vegas,USA,false,True,4.0
+1028,Zara Ali,zara.ali@gmail.com,2024-03-29,,clothing,Leather Belt,1,35.00,35.00,0.0,Debit Card,Oklahoma City,USA,false,true,
+1029,Alice Johnson,alice.johnson@gmail.com,2024-03-15,2024-03-18,Electronics,Wireless Mouse,2,29.99,59.98,0.0,Credit Card,New York,USA,false,true,4.5
+1030,Ben Carter,ben.c@yahoo.com,2024-03-30,2024-04-13,ELECTRONICS,Laptop Stand,1,67000.00,67000.00,0.0,PayPal,Tucson,USA,false,false,4.3
+1031,Chloe Adams,,30-March-2024,2024-04-14,Home & Garden,Garden Hose 50ft,1,32.99,32.99,0.0,Credit Card,Fresno,USA,false,true,3.8
+1032,Derek Fox,derek.f@outlook.com,2024-03-31,2024-04-15,Books,Algorithm Design Manual,1,54.99,54.99,0.0,Debit Card,Sacramento,USA,false,TRUE,4.6
+1033,Elena Ruiz,elena.r@gmail.com,2024-03-31,2024-04-16,Clothing,Cashmere Sweater,1,189.00,189.00,25.0,Credit Card,Mesa,USA,true,true,4.4
+1034,Felix Tran,felix.t@company.com,2024/04/01,2024-04-17,ELECTRONICS,Portable SSD 1TB,2,79.99,159.98,0.0,PayPal,Kansas City,USA,false,false,4.7
+1035,Gloria Diaz,gloria.d@email.com,01-Apr-2024,2024-04-18,Home & garden,Ceramic Vase,3,22.50,67.50,0.0,Credit Card,Atlanta,USA,false,true,3.5
+1036,Hugo Banks,hugo.b@yahoo.com,2024-04-02,2024-04-19,Electronics,Noise Cancelling Headphones,1,249.99,249.99,10.0,Debit Card,Omaha,USA,false,True,4.8
+1037,Iris Cooper,iris.c@outlook.com,April 3rd 2024,2024-04-20,CLOTHING,Rain Jacket,-1,85.00,85.00,0.0,Credit Card,Raleigh,USA,false,true,4.1
+1038,Jake Morales,jake.m@gmail.com,2024-04-03,2024-04-21,Books,System Design Interview,1,39.99,79.98,0.0,PayPal,Miami,USA,false,false,4.5
+1039,,nina.k@company.com,04/04/2024,2024-04-22,Electronics,Smart Watch Band,4,14.99,59.96,0.0,Credit Card,Virginia Beach,USA,false,true,3.9
+1040,Oscar Pena,oscar.p@email.com,2024-04-05,2024-04-23,home & Garden,Compost Bin,1,48.00,48.00,0.0,Debit Card,Long Beach,USA,false,FALSE,4.2
+1041,Paula Reed,paula.r@gmail.com,2024-04-06,2024-04-24,Electronics,Laptop Charger USB-C,1,49.99,49.99,0.0,Credit Card,Kansas City,USA,false,true,4.3
+1042,Ryan Brooks,,06-04-2024,2024-04-25,CLOTHING,Wool Beanie,-1,25.00,25.00,0.0,PayPal,Minneapolis,USA,false,false,
+1043,Sarah Mitchell,sarah.m@outlook.com,2024-04-07,2024-04-26,Home & Garden,Solar Garden Lights,4,18.99,75.96,0.0,Credit Card,Tampa,USA,false,TRUE,3.6
+1044,,tom.h@company.com,April 8 2024,2024-04-27,electronics,Smart Plug 4-Pack,1,34.99,34.99,0.0,Debit Card,St. Louis,USA,false,true,4.0
+1045,Uma Patel,uma.patel@gmail.com,2024-04-08,2024-04-28,Books,The Pragmatic Programmer,2,52.99,105.98,0.0,Credit Card,Pittsburgh,USA,false,true,4.9
+1046,Vince Hall,vince.h@yahoo.com,2024.04.09,,ELECTRONICS,Webcam 4K,1,89.99,89.99,0.0,PayPal,Cincinnati,USA,false,False,4.4
+1047,Wanda Scott,wanda.s@email.com,09/April/2024,2024-04-30,Home & garden,Bamboo Cutting Board,3,24.50,73.50,0.0,Credit Card,Irvine,USA,false,true,3.8
+1048,Xavier Ross,xavier.r@email.com,2024-04-10,2024-05-01,Clothing,Linen Pants,1,68.00,68.00,15.0,Debit Card,Orlando,USA,false,true,4.2
+1049,Yolanda Cruz,yolanda.c@outlook.com,2024-04-10,2024-05-02,Electronics,Portable Monitor 15in,1,199.99,199.99,0.0,Credit Card,Newark,USA,false,false,4.7
+1050,Zach Turner,,2024-04-11,2024-05-03,BOOKS,Designing Data Apps,1,64.99,64.99,0.0,PayPal,Buffalo,USA,false,true,4.5
+1051,Amy Foster,amy.f@gmail.com,11-Apr-2024,2024-05-04,Home & Garden,Raised Garden Bed,-1,75.00,75.00,0.0,Credit Card,Richmond,USA,false,TRUE,3.4
+1052,Brian Cole,brian.c@company.com,2024-04-12,2024-05-05,clothing,Canvas Sneakers,2,42.00,84.00,0.0,Debit Card,Boise,USA,true,true,4.1
+1053,Carla Dunn,,2024/04/13,2024-05-06,Electronics,Ring Light 18in,1,54.99,54.99,0.0,Credit Card,Spokane,USA,false,true,4.6
+1054,David Park,david.p@yahoo.com,April 14th 2024,2024-05-07,CLOTHING,Down Vest,1,110.00,110.00,20.0,PayPal,Tacoma,USA,false,false,4.3
+1055,Emily Rogers,emily.r@outlook.com,2024-04-14,2024-05-08,Books,Refactoring,1,47.99,95.98,0.0,Credit Card,Reno,USA,false,true,4.8
+1056,Felix Tran,felix.t@company.com,2024/04/01,2024-04-17,ELECTRONICS,Portable SSD 1TB,2,79.99,159.98,0.0,PayPal,Kansas City,USA,false,false,4.7
+1057,,george.w@email.com,15-04-2024,2024-05-09,home & garden,Potting Soil 40L,2,16.99,33.98,0.0,Debit Card,Madison,USA,false,true,3.7
+1058,Hannah Yee,hannah.y@gmail.com,2024-04-16,,Electronics,USB Microphone,1,79.99,79.99,0.0,Credit Card,Des Moines,USA,false,True,4.5
+1059,Ivan Lopez,ivan.l@outlook.com,2024-04-16,2024-05-11,Clothing,Cargo Pants,1,58.00,58.00,0.0,PayPal,Baton Rouge,USA,false,true,4.0
+1060,Julia Kim,julia.k@company.com,16/04/2024,2024-05-12,Electronics,Mechanical Numpad,1,39.99,39.99,0.0,Credit Card,Providence,USA,false,false,4.2
+1061,Kevin Zhao,kevin.z@yahoo.com,2024-04-17,2024-05-13,BOOKS,Introduction to Algorithms,1,85.00,850.00,0.0,Debit Card,Salt Lake City,USA,false,true,4.9
+1062,Laura Bell,,2024-04-18,2024-05-14,Home & Garden,Watering Can 2gal,2,19.99,39.98,0.0,Credit Card,Hartford,USA,false,TRUE,3.5
+1063,Mike Chen,mike.c@gmail.com,2024.04.18,2024-05-15,clothing,Flannel Shirt,-2,45.00,90.00,10.0,PayPal,Anchorage,USA,false,true,4.4
+1064,Nancy Ortiz,nancy.o@email.com,April 19 2024,2024-05-16,Electronics,Webcam Light Bar,1,32.99,32.99,0.0,Credit Card,Honolulu,USA,false,false,3.9
+1065,Oliver Grant,oliver.g@outlook.com,2024-04-20,2024-05-17,ELECTRONICS,Ethernet Cable 25ft,5,8.99,44.95,0.0,Debit Card,Lexington,USA,false,true,4.1
+1066,Priya Sharma,priya.s@company.com,20/Apr/2024,2024-05-18,Books,Database Internals,1,55.99,55.99,0.0,Credit Card,Greensboro,USA,false,True,4.7
+1067,Quincy Adams,quincy.a@gmail.com,2024-04-21,,home & GARDEN,Compost Thermometer,1,22.50,22.50,0.0,PayPal,Durham,USA,false,true,3.6
+1068,Rosa Vega,rosa.v@yahoo.com,2024-04-21,2024-05-20,Clothing,Athletic Shorts,3,28.00,84.00,0.0,Credit Card,Bakersfield,USA,false,false,4.3
+1069,Steve Park,,21-April-2024,2024-05-21,Electronics,Wireless Charger Pad,2,24.99,49.98,0.0,Debit Card,Aurora,USA,false,true,4.5
+1070,Tanya Blake,tanya.b@outlook.com,2024-04-22,2024-05-22,CLOTHING,Trench Coat,1,175.00,175000.00,0.0,Credit Card,Chandler,USA,false,TRUE,4.8
+1071,Bob Smith,bob.smith@yahoo.com,15/03/2024,2024-03-20,ELECTRONICS,Mechanical Keyboard,1,89.99,89.99,5.0,PayPal,Los Angeles,USA,false,true,4.8
+1072,Uma Nair,uma.n@gmail.com,2024-04-23,2024-05-23,Home & Garden,Herb Starter Kit,1,29.99,29.99,0.0,PayPal,Scottsdale,USA,false,true,3.8
+1073,Vera Song,vera.s@company.com,23/04/2024,2024-05-24,Electronics,Smart Light Bulbs 4pk,1,44.99,44.99,0.0,Credit Card,Norfolk,USA,false,False,4.0
+1074,,will.j@email.com,April 24th 2024,2024-05-25,BOOKS,Cracking the Coding Interview,1,39.95,39.95,0.0,Debit Card,Fremont,USA,false,true,4.9
+1075,Xena Torres,xena.t@yahoo.com,2024-04-25,2024-05-26,clothing,Puffer Jacket,-1,145.00,145.00,0.0,Credit Card,Garland,USA,false,true,4.2
+1076,Yusuf Ali,yusuf.a@outlook.com,2024.04.25,,Home & garden,Cast Iron Planter,2,38.50,77.00,0.0,PayPal,Chesapeake,USA,true,true,3.4
+1077,Zoe Martin,zoe.m@gmail.com,2024-04-26,2024-05-28,Electronics,Travel Adapter Universal,3,15.99,47.97,0.0,Credit Card,Irving,USA,false,TRUE,4.6
+1078,Aaron Bell,aaron.b@company.com,26-Apr-2024,2024-05-29,ELECTRONICS,Cable Management Kit,1,21.99,21.99,0.0,Debit Card,Hialeah,USA,false,true,3.7
+1079,Beth Cooper,,2024-04-27,2024-05-30,Clothing,Linen Blazer,1,125.00,125.00,15.0,Credit Card,Laredo,USA,false,false,4.4
+1080,Carlos Ruiz,carlos.r@yahoo.com,27/April/2024,2024-05-31,Books,Operating Systems Concepts,1,89.99,89.99,0.0,PayPal,Plano,USA,false,true,4.5

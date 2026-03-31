@@ -17,6 +17,7 @@ class VeriGenConfig:
     env_url: str = "http://localhost:7860"
     difficulty: str = "medium"
     generated_rows: int = 30
+    csv_path: str = ""
     run_history: list = field(default_factory=list)
 
     def add_run(self, run_data: dict):
@@ -34,6 +35,7 @@ def save_config(config: VeriGenConfig, path: str = CONFIG_PATH):
         "env_url": config.env_url,
         "difficulty": config.difficulty,
         "generated_rows": config.generated_rows,
+        "csv_path": config.csv_path,
         "run_history": config.run_history,
     }
     with open(path, "w") as f:

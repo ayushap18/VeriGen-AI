@@ -1,4 +1,4 @@
-/* VeriGen-AI Bloomberg/Grafana Dark Theme */
+/* VeriGen-AI Bloomberg Terminal Dark Theme */
 
 Screen {
     background: #0a0a0f;
@@ -28,15 +28,15 @@ DataTable > .datatable--cursor {
 
 /* Footer */
 Footer {
-    background: #1a1a2e;
+    background: #0a1a0a;
 }
 
 FooterKey {
-    background: #1a1a2e;
-    color: #6666aa;
+    background: #0a1a0a;
+    color: #00ff88;
 }
 
 /* Rule lines */
 Rule {
-    color: #2a2a4a;
+    color: #1a3a1a;
 }

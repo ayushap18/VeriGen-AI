@@ -1,4 +1,4 @@
-"""Setup screen — provider, API key, model, and task configuration."""
+"""Setup screen — Bloomberg terminal style with CSV file support."""
 
 from textual.app import ComposeResult
 from textual.screen import Screen
@@ -13,38 +13,50 @@ from dashboard.config import VeriGenConfig, load_config, save_config
 
 
 BANNER = """\
-[#00d4ff bold]
+[#00ff88 bold]
 ██╗   ██╗███████╗██████╗ ██╗ ██████╗ ███████╗███╗   ██╗
 ██║   ██║██╔════╝██╔══██╗██║██╔════╝ ██╔════╝████╗  ██║
 ██║   ██║█████╗  ██████╔╝██║██║  ███╗█████╗  ██╔██╗ ██║
 ╚██╗ ██╔╝██╔══╝  ██╔══██╗██║██║   ██║██╔══╝  ██║╚██╗██║
  ╚████╔╝ ███████╗██║  ██║██║╚██████╔╝███████╗██║ ╚████║
   ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-[/#00d4ff bold]"""
+[/#00ff88 bold]"""
 
 
 class SetupScreen(Screen):
     CSS = """
-    Screen { background: #0a0a0f; }
+    Screen { background: #020502; }
     #setup-outer { align: center middle; }
     #setup-box {
-        width: 76;
+        width: 80;
         height: auto;
-        background: #0f0f1a;
-        border: double #00d4ff;
+        background: #050a05;
+        border: double #00ff88;
         padding: 1 2;
     }
-    #banner { text-align: center; color: #00d4ff; }
-    #subtitle { text-align: center; color: #6666aa; margin-bottom: 1; }
-    .section-label { color: #00d4ff; text-style: bold; margin-top: 1; }
-    #api-key-input { margin: 0 0 1 0; }
+    #banner { text-align: center; color: #00ff88; }
+    #subtitle { text-align: center; color: #3a6a3a; margin-bottom: 1; }
+    .section-label { color: #00ff88; text-style: bold; margin-top: 1; }
+    Input {
+        margin: 0 0 1 0;
+        border: solid #1a3a1a;
+        background: #0a1a0a;
+        color: #00ff88;
+    }
     #launch-btn {
         width: 100%;
         margin-top: 1;
+        background: #0a2a0a;
+        color: #00ff88;
+        border: solid #00ff88;
     }
-    #status-line { color: #6666aa; text-align: center; margin-top: 1; }
+    #launch-btn:hover { background: #1a4a1a; }
+    #status-line { color: #3a6a3a; text-align: center; margin-top: 1; }
     #model-section { margin-top: 1; }
-    RadioSet { background: #0a0a0f; border: solid #2a2a4a; }
+    #csv-hint { color: #3a6a3a; margin: 0 0 1 0; }
+    RadioSet { background: #0a1a0a; border: solid #1a3a1a; }
+    RadioButton { color: #00ff88; }
+    Rule { color: #1a3a1a; }
     """
 
     BINDINGS = [
@@ -61,15 +73,18 @@ class SetupScreen(Screen):
         with Vertical(id="setup-outer"):
             with Vertical(id="setup-box"):
                 yield Static(BANNER, id="banner")
-                yield Static("[#6666aa]Data Cleaning Agent v3.0[/#6666aa]", id="subtitle")
-                yield Rule()
+                yield Static(
+                    "[#3a6a3a]Data Cleaning Agent Terminal v3.0[/#3a6a3a]\n"
+                    "[#1a3a1a]\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501[/#1a3a1a]",
+                    id="subtitle"
+                )
 
-                yield Static("[#00d4ff bold]PROVIDER[/#00d4ff bold]", classes="section-label")
+                yield Static("[#00ff88 bold]\u25b8 PROVIDER[/#00ff88 bold]", classes="section-label")
                 with RadioSet(id="provider-select"):
                     for key, p in PROVIDERS.items():
                         yield RadioButton(p["label"], value=(key == self.selected_provider))
 
-                yield Static("[#00d4ff bold]API KEY[/#00d4ff bold]", classes="section-label")
+                yield Static("[#00ff88 bold]\u25b8 API KEY[/#00ff88 bold]", classes="section-label")
                 yield Input(
                     placeholder="Enter your API key...",
                     password=True,
@@ -77,15 +92,29 @@ class SetupScreen(Screen):
                     id="api-key-input"
                 )
 
-                yield Static("[#00d4ff bold]MODEL[/#00d4ff bold]", classes="section-label")
+                yield Static("[#00ff88 bold]\u25b8 MODEL[/#00ff88 bold]", classes="section-label")
                 with Vertical(id="model-section"):
                     with RadioSet(id="model-select"):
                         models = PROVIDERS.get(self.selected_provider, {}).get("models", [])
                         for i, m in enumerate(models):
                             yield RadioButton(m, value=(i == 0 if not self.selected_model else m == self.selected_model))
 
+                yield Static("[#00ff88 bold]\u25b8 CSV FILE (optional)[/#00ff88 bold]", classes="section-label")
+                yield Static(
+                    "[#3a6a3a]Provide path to your own CSV file, or leave blank for built-in tasks[/#3a6a3a]",
+                    id="csv-hint"
+                )
+                yield Input(
+                    placeholder="/path/to/your/data.csv",
+                    value=self.config.csv_path,
+                    id="csv-path-input"
+                )
+
                 yield Rule()
-                yield Button("LAUNCH DASHBOARD", id="launch-btn", variant="primary")
+                yield Button(
+                    "\u25b6  INITIALIZE TERMINAL",
+                    id="launch-btn", variant="success"
+                )
                 yield Static("", id="status-line")
 
         yield Footer()
@@ -104,20 +133,20 @@ class SetupScreen(Screen):
                 pricing = get_pricing(self.selected_provider, self.selected_model)
                 status = self.query_one("#status-line", Static)
                 status.update(
-                    f"[#6666aa]${pricing['cost_per_1m_in']}/1M in | "
-                    f"${pricing['cost_per_1m_out']}/1M out[/#6666aa]"
+                    f"[#3a6a3a]${pricing['cost_per_1m_in']}/1M in | "
+                    f"${pricing['cost_per_1m_out']}/1M out[/#3a6a3a]"
                 )
 
-    def _refresh_models(self):
-        model_section = self.query_one("#model-section", Vertical)
+    async def _refresh_models(self):
         old_radio = self.query_one("#model-select", RadioSet)
-        old_radio.remove()
+        await old_radio.remove()
 
+        model_section = self.query_one("#model-section", Vertical)
         models = PROVIDERS.get(self.selected_provider, {}).get("models", [])
         radio_set = RadioSet(id="model-select")
-        model_section.mount(radio_set)
+        await model_section.mount(radio_set)
         for i, m in enumerate(models):
-            radio_set.mount(RadioButton(m, value=(i == 0)))
+            await radio_set.mount(RadioButton(m, value=(i == 0)))
         if models:
             self.selected_model = models[0]
 
@@ -125,9 +154,24 @@ class SetupScreen(Screen):
         if event.button.id == "launch-btn":
             api_key = self.query_one("#api-key-input", Input).value.strip()
             if not api_key:
-                status = self.query_one("#status-line", Static)
-                status.update("[#ff4444]API key is required![/#ff4444]")
+                self.query_one("#status-line", Static).update(
+                    "[#ff4444]\u26a0 API key is required![/#ff4444]"
+                )
                 return
+
+            csv_path = self.query_one("#csv-path-input", Input).value.strip()
+            if csv_path:
+                import os
+                if not os.path.exists(csv_path):
+                    self.query_one("#status-line", Static).update(
+                        f"[#ff4444]\u26a0 File not found: {csv_path}[/#ff4444]"
+                    )
+                    return
+                if not csv_path.endswith(".csv"):
+                    self.query_one("#status-line", Static).update(
+                        "[#ff4444]\u26a0 File must be a .csv file[/#ff4444]"
+                    )
+                    return
 
             if not self.selected_model:
                 models = PROVIDERS.get(self.selected_provider, {}).get("models", [])
@@ -136,6 +180,7 @@ class SetupScreen(Screen):
             self.config.provider = self.selected_provider
             self.config.model = self.selected_model
             self.config.api_key = api_key
+            self.config.csv_path = csv_path
             save_config(self.config)
 
             self.app.launch_config = self.config

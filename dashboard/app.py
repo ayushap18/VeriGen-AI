@@ -25,20 +25,17 @@ class VeriGenApp(App):
         self.run_result: RunComplete | None = None
 
     def on_mount(self):
-        self.install_screen(SetupScreen(), name="setup")
-        self.push_screen("setup")
+        self.push_screen(SetupScreen())
 
     def push_screen(self, screen, *args, **kwargs):
         if isinstance(screen, str):
             if screen == "run" and self.launch_config:
                 run_screen = RunScreen(self.launch_config)
-                self.install_screen(run_screen, name="run")
-                super().push_screen("run")
+                super().push_screen(run_screen)
                 return
             elif screen == "summary" and self.run_result:
                 config = self.launch_config or load_config()
                 summary = SummaryScreen(self.run_result, config.model, config.provider)
-                self.install_screen(summary, name="summary")
-                super().push_screen("summary")
+                super().push_screen(summary)
                 return
         super().push_screen(screen, *args, **kwargs)
