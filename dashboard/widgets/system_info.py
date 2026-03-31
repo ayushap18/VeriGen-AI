@@ -1,10 +1,11 @@
 """System information panel."""
 
 from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Static
 
 
-class SystemInfo(Static):
+class SystemInfo(Widget):
     DEFAULT_CSS = """
     SystemInfo {
         height: auto;

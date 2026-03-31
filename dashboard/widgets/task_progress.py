@@ -1,10 +1,11 @@
 """Task progress bars panel."""
 
 from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Static
 
 
-class TaskProgress(Static):
+class TaskProgress(Widget):
     DEFAULT_CSS = """
     TaskProgress {
         height: auto;

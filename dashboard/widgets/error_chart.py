@@ -1,6 +1,7 @@
 """Error breakdown horizontal bar chart."""
 
 from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Static
 
 ERROR_COLORS = {
@@ -15,7 +16,7 @@ ERROR_COLORS = {
 }
 
 
-class ErrorChart(Static):
+class ErrorChart(Widget):
     DEFAULT_CSS = """
     ErrorChart {
         height: auto;

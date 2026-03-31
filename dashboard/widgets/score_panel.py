@@ -1,10 +1,11 @@
 """Score gauge panel with sparkline."""
 
 from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Static
 
 
-class ScorePanel(Static):
+class ScorePanel(Widget):
     DEFAULT_CSS = """
     ScorePanel {
         height: 5;

@@ -1,10 +1,11 @@
 """Token usage and cost panel."""
 
 from textual.app import ComposeResult
+from textual.widget import Widget
 from textual.widgets import Static
 
 
-class TokenPanel(Static):
+class TokenPanel(Widget):
     DEFAULT_CSS = """
     TokenPanel {
         height: 5;
