@@ -5,10 +5,10 @@ Uses chain-of-thought reasoning, hint-driven planning, and self-verification.
 Required environment variables:
   - API_BASE_URL: Base URL for the OpenAI-compatible API
   - MODEL_NAME: Model to use
-  - HF_TOKEN: Hugging Face token for authentication
+  - OPENAI_API_KEY (or HF_TOKEN): API key for authentication
 
 Usage:
-  API_BASE_URL=http://... MODEL_NAME=... HF_TOKEN=... python inference.py
+  API_BASE_URL=http://... MODEL_NAME=... OPENAI_API_KEY=... python inference.py
 """
 
 import os
@@ -19,7 +19,7 @@ from openai import OpenAI
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:7860")
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
-HF_TOKEN = os.environ.get("HF_TOKEN", "")
+API_KEY = os.environ.get("OPENAI_API_KEY") or os.environ.get("HF_TOKEN", "")
 ENV_URL = os.environ.get("ENV_URL", "http://localhost:7860")
 
 CURATED_TASKS = ["fix_dates_and_nulls", "dedup_and_normalize", "full_pipeline_clean"]
@@ -28,7 +28,7 @@ SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 
 
 def get_openai_client() -> OpenAI:
-    return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+    return OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 
 def call_llm(client: OpenAI, system_prompt: str, user_prompt: str) -> str:
@@ -57,7 +57,15 @@ def env_reset(task_id: str) -> dict:
 
 
 def env_step(action: dict) -> dict:
-    resp = requests.post(f"{ENV_URL}/step", json=action)
+    # Only send fields the API expects — LLMs sometimes add extras
+    clean = {"action_type": action.get("action_type", "submit")}
+    if action.get("row_index") is not None:
+        clean["row_index"] = int(action["row_index"])
+    if action.get("column_name"):
+        clean["column_name"] = str(action["column_name"])
+    if action.get("new_value") is not None:
+        clean["new_value"] = str(action["new_value"])
+    resp = requests.post(f"{ENV_URL}/step", json=clean)
     resp.raise_for_status()
     return resp.json()
 
@@ -106,45 +114,33 @@ def build_analysis_prompt(obs: dict, hints_data: dict) -> str:
 
     if sorted_hints:
         hints_lines = []
-        for h in sorted_hints[:15]:
-            hints_lines.append(
-                f"  [{h['severity'].upper()}] Row {h['row_index']}, "
-                f"col '{h['column_name']}': {h['description']} "
-                f"(suggest: {h['suggested_action']})"
-            )
-        hints_text = "Detected errors (prioritized):\n" + "\n".join(hints_lines)
+        for h in sorted_hints[:20]:
+            line = f"  [{h['severity'].upper()}] Row {h['row_index']}"
+            if h.get('column_name'):
+                line += f", col '{h['column_name']}'"
+            line += f": {h['description']}"
+            line += f" → {h['suggested_action']}"
+            hints_lines.append(line)
+        hints_text = f"Detected {len(sorted_hints)} errors:\n" + "\n".join(hints_lines)
     else:
-        hints_text = "No errors detected by the hint system."
+        hints_text = "No errors detected."
 
-    return f"""Current dataset (CSV):
+    return f"""Dataset (CSV):
 {obs['dataset_csv']}
 
-Column types expected: {json.dumps(obs['column_types'])}
-Rows: {obs['num_rows']}
-Step {obs['step_number']}/{obs['max_steps']}
-Current score: {obs['score']}
-Last action: {obs['last_action_message']}
+Column types: {json.dumps(obs['column_types'])}
+Rows: {obs['num_rows']} | Step {obs['step_number']}/{obs['max_steps']} | Score: {obs['score']}
 
 {hints_text}
 
-STRATEGY:
-1. Fix HIGH severity errors first (malformed dates, missing values, type errors)
-2. Then MEDIUM severity (duplicates, inconsistent casing, outliers)
-3. Then LOW severity (minor formatting)
-4. After all errors are fixed, SUBMIT
+Pick the SINGLE highest-priority fix from the hints above.
+Priority: duplicate_row > wrong_computed > malformed_date > missing_value > negative_value > outlier > invalid_boolean > type_error
+Row indices are 0-based. After delete_row, indices shift down.
 
-Pick the SINGLE most impactful action. If score is already high and few errors remain, consider submitting.
-Row indices are 0-based and update after deletions.
-
-Respond with ONLY a JSON action object."""
+Respond with ONLY a JSON object."""
 
 
-SYSTEM_PROMPT = """You are an expert data cleaning agent. You systematically clean dirty datasets using a structured approach:
-
-1. SCAN: Analyze the dataset for all error types
-2. PLAN: Prioritize fixes by severity and impact
-3. EXECUTE: Fix one error at a time, starting with the highest impact
-4. VERIFY: Check that each fix improved the score
+SYSTEM_PROMPT = """You are an expert data cleaning agent. Fix ONE error per step.
 
 Available actions (respond with exactly ONE JSON object):
 - {"action_type": "fix_date", "row_index": N, "column_name": "col", "new_value": "YYYY-MM-DD"}
@@ -152,19 +148,23 @@ Available actions (respond with exactly ONE JSON object):
 - {"action_type": "delete_row", "row_index": N}
 - {"action_type": "replace_value", "row_index": N, "column_name": "col", "new_value": "value"}
 - {"action_type": "fix_type", "row_index": N, "column_name": "col", "new_value": "value"}
-- {"action_type": "submit"} — when the dataset is clean
+- {"action_type": "submit"}
 
-Rules:
-- Dates must be YYYY-MM-DD format
-- Missing strings: fill with sensible defaults (e.g., "Unknown", "unknown@example.com")
-- Missing numbers: fill with 0
-- Duplicates: delete the later occurrence (keep first)
-- Categories: normalize to Title Case
-- Booleans: normalize to lowercase "true"/"false"
-- Computed columns (like total = quantity * unit_price): recalculate
-- Negative quantities or extreme outlier prices: fix to reasonable values
+CRITICAL RULES:
+- Dates: convert to YYYY-MM-DD (e.g. "03/15/2024" → "2024-03-15", "15-Mar-2024" → "2024-03-15")
+- Missing strings: "Unknown" for names/cities, "unknown@example.com" for emails
+- Missing numbers: "0" for integers, "0.0" for floats
+- Booleans: must be exactly "true" or "false" (lowercase)
+- Duplicates: use delete_row on the LATER duplicate (higher row index), keep first
+- Computed columns: if total = quantity * unit_price, recalculate (e.g. qty=3, price=10.0 → total="30.0")
+- Negative quantities: replace with absolute value
+- Outlier prices (>50000): replace with median of other prices in that column
+- Categories: normalize to Title Case (e.g. "ELECTRONICS" → "Electronics")
 
-Respond with ONLY a JSON object. No explanation."""
+IMPORTANT: After delete_row, all row indices shift down! Re-examine indices.
+Row indices are 0-based.
+
+Respond with ONLY a JSON object. No markdown, no explanation."""
 
 
 def extract_json(text: str) -> dict:
@@ -210,6 +210,8 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
 
     prev_score = 0.0
     stall_count = 0
+    undo_count = 0
+    failed_actions = set()
 
     for step_num in range(obs['max_steps']):
         if obs.get('done', False):
@@ -224,14 +226,26 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
             print(f"  Step {step_num+1}: No errors detected, submitting...")
             action = {"action_type": "submit"}
         else:
-            user_prompt = build_analysis_prompt(obs, hints_data)
-            llm_response = call_llm(client, SYSTEM_PROMPT, user_prompt)
+            # Filter out previously failed actions from hints
+            if failed_actions:
+                filtered = [h for h in hints_data.get("hints", [])
+                            if f"{h['row_index']}:{h['column_name']}" not in failed_actions]
+                hints_data = dict(hints_data)
+                hints_data["hints"] = filtered
+                hints_data["total_errors"] = len(filtered)
 
-            if not llm_response:
-                print(f"  Step {step_num+1}: Empty LLM response, submitting...")
+            if not hints_data.get("hints"):
+                print(f"  Step {step_num+1}: No actionable hints remaining, submitting...")
                 action = {"action_type": "submit"}
             else:
-                action = extract_json(llm_response)
+                user_prompt = build_analysis_prompt(obs, hints_data)
+                llm_response = call_llm(client, SYSTEM_PROMPT, user_prompt)
+
+                if not llm_response:
+                    print(f"  Step {step_num+1}: Empty LLM response, submitting...")
+                    action = {"action_type": "submit"}
+                else:
+                    action = extract_json(llm_response)
 
         action_desc = action.get("action_type", "?")
         if action.get("row_index") is not None:
@@ -250,19 +264,31 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
         # Self-verification: undo if score dropped
         if delta < -0.01 and action.get("action_type") != "submit":
             print(f"  -> Score dropped! Undoing...")
+            undo_count += 1
+            # Track this as a failed action so we don't retry it
+            action_key = f"{action.get('row_index')}:{action.get('column_name', '*')}"
+            failed_actions.add(action_key)
             try:
                 obs = env_undo()
                 current_score = obs.get("score", 0.0)
             except Exception:
                 pass
 
-        # Stall detection
+            # If too many undos, stop trying
+            if undo_count >= 5:
+                print(f"  -> Too many undos ({undo_count}), submitting...")
+                obs = env_step({"action_type": "submit"})
+                break
+        else:
+            undo_count = 0
+
+        # Stall detection — be more patient, some fixes need multiple steps
         if abs(delta) < 0.001:
             stall_count += 1
         else:
             stall_count = 0
 
-        if stall_count >= 3 and current_score > 0.3:
+        if stall_count >= 5 and current_score > 0.3:
             print(f"  -> Stalled for {stall_count} steps, submitting...")
             obs = env_step({"action_type": "submit"})
             break
@@ -290,6 +316,7 @@ def main():
     print("Data Cleaning Agent v2.0 — Smart Inference")
     print(f"  API: {API_BASE_URL}")
     print(f"  Model: {MODEL_NAME}")
+    print(f"  Key: {'***' + API_KEY[-4:] if API_KEY else 'NONE'}")
     print(f"  Environment: {ENV_URL}")
     print()
 

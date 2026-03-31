@@ -1,0 +1,10 @@
+{
+  "scores": {
+    "fix_dates_and_nulls": 0.67,
+    "dedup_and_normalize": 0.4565,
+    "full_pipeline_clean": 0.3483,
+    "generated_medium_30r": 0.4761
+  },
+  "average": 0.487725,
+  "version": "2.0"
+}
