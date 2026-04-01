@@ -4,7 +4,6 @@ from dashboard.providers import PROVIDERS, get_provider, get_pricing
 def test_all_providers_exist():
     assert "gemini" in PROVIDERS
     assert "openai" in PROVIDERS
-    assert "anthropic" in PROVIDERS
     assert "grok" in PROVIDERS
 
 

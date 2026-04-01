@@ -37,20 +37,6 @@ PROVIDERS = {
             "gpt-4.1-mini": {"cost_per_1m_in": 0.40, "cost_per_1m_out": 1.60},
         },
     },
-    "anthropic": {
-        "label": "Anthropic",
-        "base_url": "https://api.anthropic.com/v1",
-        "key_env": "ANTHROPIC_API_KEY",
-        "key_prefix": "sk-ant-",
-        "models": [
-            "claude-sonnet-4-5-20250514",
-            "claude-haiku-3-5-20241022",
-        ],
-        "pricing": {
-            "claude-sonnet-4-5-20250514": {"cost_per_1m_in": 3.00, "cost_per_1m_out": 15.00},
-            "claude-haiku-3-5-20241022": {"cost_per_1m_in": 0.80, "cost_per_1m_out": 4.00},
-        },
-    },
     "grok": {
         "label": "xAI Grok",
         "base_url": "https://api.x.ai/v1",

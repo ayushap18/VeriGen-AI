@@ -137,16 +137,16 @@ class SetupScreen(Screen):
                     f"${pricing['cost_per_1m_out']}/1M out[/#3a6a3a]"
                 )
 
-    async def _refresh_models(self):
-        old_radio = self.query_one("#model-select", RadioSet)
-        await old_radio.remove()
-
+    def _refresh_models(self):
         model_section = self.query_one("#model-section", Vertical)
         models = PROVIDERS.get(self.selected_provider, {}).get("models", [])
+
+        # Remove all children and rebuild with new models
+        model_section.remove_children()
         radio_set = RadioSet(id="model-select")
-        await model_section.mount(radio_set)
         for i, m in enumerate(models):
-            await radio_set.mount(RadioButton(m, value=(i == 0)))
+            radio_set.compose_add_child(RadioButton(m, value=(i == 0)))
+        model_section.mount(radio_set)
         if models:
             self.selected_model = models[0]
 
