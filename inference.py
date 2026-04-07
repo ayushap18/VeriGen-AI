@@ -19,11 +19,13 @@ import requests
 from openai import OpenAI
 
 # ---- Configuration from environment variables ----
+# Defaults are set only for API_BASE_URL and MODEL_NAME (not HF_TOKEN)
 
-API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:7860")
-MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
-API_KEY = os.environ.get("OPENAI_API_KEY") or os.environ.get("HF_TOKEN", "")
-ENV_URL = os.environ.get("ENV_URL", "http://localhost:7860")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:7860")
+MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN")
+API_KEY = os.getenv("OPENAI_API_KEY") or HF_TOKEN or ""
+ENV_URL = os.getenv("ENV_URL", "http://localhost:7860")
 
 ENV_NAME = "data-cleaning-agent"
 SUCCESS_THRESHOLD = 0.5
