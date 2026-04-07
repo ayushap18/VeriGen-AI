@@ -61,7 +61,7 @@ def root():
 @app.get("/health")
 def health():
     return {
-        "status": "ok",
+        "status": "healthy",
         "version": "2.0.0",
         "uptime_seconds": round(time.time() - _start_time, 2),
         "available_tasks": list(TASKS.keys()),
@@ -69,7 +69,8 @@ def health():
             "GET /", "GET /health", "GET /tasks",
             "POST /reset", "POST /step", "GET /state",
             "GET /hints", "GET /validate", "POST /undo",
-            "GET /episodes", "POST /generate"
+            "GET /episodes", "POST /generate",
+            "GET /metadata", "GET /schema", "POST /mcp"
         ],
         "features": {
             "dynamic_generation": True,
@@ -79,6 +80,35 @@ def health():
             "episode_tracking": True,
         }
     }
+
+
+@app.get("/metadata")
+def metadata():
+    return {
+        "name": "data-cleaning-agent",
+        "description": (
+            "An OpenEnv-compliant environment for training AI agents to clean messy datasets. "
+            "Features dynamic task generation, error detection hints, undo/redo, validation, "
+            "and multi-episode tracking."
+        ),
+        "version": "2.0.0",
+        "authors": ["Codecatalysts"],
+        "tags": ["data-cleaning", "tabular-data", "real-world"],
+    }
+
+
+@app.get("/schema")
+def schema():
+    return {
+        "action": Action.model_json_schema(),
+        "observation": Observation.model_json_schema(),
+        "state": State.model_json_schema(),
+    }
+
+
+@app.post("/mcp")
+def mcp():
+    return {"jsonrpc": "2.0", "result": {"status": "ok"}}
 
 
 @app.post("/reset", response_model=Observation)

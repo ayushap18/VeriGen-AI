@@ -8,7 +8,7 @@ def test_health_endpoint():
     r = client.get("/health")
     assert r.status_code == 200
     data = r.json()
-    assert data["status"] == "ok"
+    assert data["status"] == "healthy"
     assert "uptime_seconds" in data
     assert "version" in data
     assert "endpoints" in data

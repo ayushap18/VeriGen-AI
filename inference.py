@@ -6,6 +6,7 @@ Required environment variables:
   - API_BASE_URL: Base URL for the OpenAI-compatible API
   - MODEL_NAME: Model to use
   - OPENAI_API_KEY (or HF_TOKEN): API key for authentication
+  - ENV_URL: Environment server URL (default: http://localhost:7860)
 
 Usage:
   API_BASE_URL=http://... MODEL_NAME=... OPENAI_API_KEY=... python inference.py
@@ -17,15 +18,39 @@ import re
 import requests
 from openai import OpenAI
 
+# ---- Configuration from environment variables ----
+
 API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:7860")
 MODEL_NAME = os.environ.get("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")
 API_KEY = os.environ.get("OPENAI_API_KEY") or os.environ.get("HF_TOKEN", "")
 ENV_URL = os.environ.get("ENV_URL", "http://localhost:7860")
 
+ENV_NAME = "data-cleaning-agent"
+SUCCESS_THRESHOLD = 0.5
+
 CURATED_TASKS = ["fix_dates_and_nulls", "dedup_and_normalize", "full_pipeline_clean"]
 
 SEVERITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 
+
+# ---- Structured logging (OpenEnv spec) ----
+
+def log_start(task: str, env: str, model: str):
+    print(f"[START] task={task} env={env} model={model}", flush=True)
+
+
+def log_step(step: int, action: str, reward: float, done: bool, error):
+    done_val = str(done).lower()
+    error_val = error if error else "null"
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
+
+
+def log_end(success: bool, steps: int, score: float, rewards: list):
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+
+
+# ---- OpenAI client ----
 
 def get_openai_client() -> OpenAI:
     return OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
@@ -57,7 +82,6 @@ def env_reset(task_id: str) -> dict:
 
 
 def env_step(action: dict) -> dict:
-    # Only send fields the API expects — LLMs sometimes add extras
     clean = {"action_type": action.get("action_type", "submit")}
     if action.get("row_index") is not None:
         clean["row_index"] = int(action["row_index"])
@@ -101,7 +125,6 @@ def env_generate(num_rows: int = 50, difficulty: str = "medium",
 # ---- Agent Logic ----
 
 def prioritize_hints(hints: list[dict]) -> list[dict]:
-    """Sort hints by severity (high first), then by row index."""
     return sorted(hints, key=lambda h: (
         SEVERITY_ORDER.get(h.get("severity", "low"), 3),
         h.get("row_index", 0)
@@ -109,7 +132,6 @@ def prioritize_hints(hints: list[dict]) -> list[dict]:
 
 
 def build_analysis_prompt(obs: dict, hints_data: dict) -> str:
-    """Build a detailed prompt with dataset state and detected errors."""
     sorted_hints = prioritize_hints(hints_data.get("hints", []))
 
     if sorted_hints:
@@ -119,7 +141,7 @@ def build_analysis_prompt(obs: dict, hints_data: dict) -> str:
             if h.get('column_name'):
                 line += f", col '{h['column_name']}'"
             line += f": {h['description']}"
-            line += f" → {h['suggested_action']}"
+            line += f" -> {h['suggested_action']}"
             hints_lines.append(line)
         hints_text = f"Detected {len(sorted_hints)} errors:\n" + "\n".join(hints_lines)
     else:
@@ -151,15 +173,15 @@ Available actions (respond with exactly ONE JSON object):
 - {"action_type": "submit"}
 
 CRITICAL RULES:
-- Dates: convert to YYYY-MM-DD (e.g. "03/15/2024" → "2024-03-15", "15-Mar-2024" → "2024-03-15")
+- Dates: convert to YYYY-MM-DD (e.g. "03/15/2024" -> "2024-03-15", "15-Mar-2024" -> "2024-03-15")
 - Missing strings: "Unknown" for names/cities, "unknown@example.com" for emails
 - Missing numbers: "0" for integers, "0.0" for floats
 - Booleans: must be exactly "true" or "false" (lowercase)
 - Duplicates: use delete_row on the LATER duplicate (higher row index), keep first
-- Computed columns: if total = quantity * unit_price, recalculate (e.g. qty=3, price=10.0 → total="30.0")
+- Computed columns: if total = quantity * unit_price, recalculate (e.g. qty=3, price=10.0 -> total="30.0")
 - Negative quantities: replace with absolute value
 - Outlier prices (>50000): replace with median of other prices in that column
-- Categories: normalize to Title Case (e.g. "ELECTRONICS" → "Electronics")
+- Categories: normalize to Title Case (e.g. "ELECTRONICS" -> "Electronics")
 
 IMPORTANT: After delete_row, all row indices shift down! Re-examine indices.
 Row indices are 0-based.
@@ -168,7 +190,6 @@ Respond with ONLY a JSON object. No markdown, no explanation."""
 
 
 def extract_json(text: str) -> dict:
-    """Extract JSON object from LLM response."""
     text = text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
@@ -190,27 +211,32 @@ def extract_json(text: str) -> dict:
     return {"action_type": "submit"}
 
 
+def format_action(action: dict) -> str:
+    action_type = action.get("action_type", "?")
+    parts = [action_type]
+    if action.get("row_index") is not None:
+        parts.append(f"r{action['row_index']}")
+    if action.get("column_name"):
+        parts.append(action["column_name"])
+    return "_".join(parts)
+
+
 def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
              gen_config: dict = None) -> float:
     """Run a single task with the smart agent."""
-    print(f"\n{'='*60}")
-    print(f"Task: {task_id}")
-    print(f"{'='*60}")
 
     if use_generate and gen_config:
         obs = env_generate(**gen_config)
-        print(f"  [Generated] rows={gen_config.get('num_rows')}, "
-              f"difficulty={gen_config.get('difficulty')}")
     else:
         obs = env_reset(task_id)
 
-    print(f"  Rows: {obs['num_rows']}, Columns: {obs['num_columns']}")
-    print(f"  Column types: {obs['column_types']}")
-    print(f"  Max steps: {obs['max_steps']}")
+    log_start(task=task_id, env=ENV_NAME, model=MODEL_NAME)
 
     prev_score = 0.0
     stall_count = 0
     undo_count = 0
+    total_steps = 0
+    rewards = []
     failed_actions = set()
 
     for step_num in range(obs['max_steps']):
@@ -222,11 +248,11 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
         except Exception:
             hints_data = {"total_errors": 0, "hints": []}
 
+        error = None
+
         if hints_data["total_errors"] == 0 and obs.get("score", 0) > 0.5:
-            print(f"  Step {step_num+1}: No errors detected, submitting...")
             action = {"action_type": "submit"}
         else:
-            # Filter out previously failed actions from hints
             if failed_actions:
                 filtered = [h for h in hints_data.get("hints", [])
                             if f"{h['row_index']}:{h['column_name']}" not in failed_actions]
@@ -235,37 +261,37 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
                 hints_data["total_errors"] = len(filtered)
 
             if not hints_data.get("hints"):
-                print(f"  Step {step_num+1}: No actionable hints remaining, submitting...")
                 action = {"action_type": "submit"}
             else:
                 user_prompt = build_analysis_prompt(obs, hints_data)
                 llm_response = call_llm(client, SYSTEM_PROMPT, user_prompt)
 
                 if not llm_response:
-                    print(f"  Step {step_num+1}: Empty LLM response, submitting...")
                     action = {"action_type": "submit"}
+                    error = "empty_llm_response"
                 else:
                     action = extract_json(llm_response)
 
-        action_desc = action.get("action_type", "?")
-        if action.get("row_index") is not None:
-            action_desc += f" r{action['row_index']}"
-        if action.get("column_name"):
-            action_desc += f":{action['column_name']}"
-
         obs = env_step(action)
+        total_steps += 1
         current_score = obs.get("score", 0.0)
         delta = current_score - prev_score
-        delta_str = f"+{delta:.4f}" if delta >= 0 else f"{delta:.4f}"
+        done = obs.get("done", False)
 
-        print(f"  Step {step_num+1}: {action_desc:30s} "
-              f"score={current_score:.4f} ({delta_str})")
+        action_str = format_action(action)
+        rewards.append(current_score)
+
+        log_step(
+            step=total_steps,
+            action=action_str,
+            reward=current_score,
+            done=done,
+            error=error
+        )
 
         # Self-verification: undo if score dropped
         if delta < -0.01 and action.get("action_type") != "submit":
-            print(f"  -> Score dropped! Undoing...")
             undo_count += 1
-            # Track this as a failed action so we don't retry it
             action_key = f"{action.get('row_index')}:{action.get('column_name', '*')}"
             failed_actions.add(action_key)
             try:
@@ -274,23 +300,28 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
             except Exception:
                 pass
 
-            # If too many undos, stop trying
             if undo_count >= 5:
-                print(f"  -> Too many undos ({undo_count}), submitting...")
                 obs = env_step({"action_type": "submit"})
+                total_steps += 1
+                rewards.append(obs.get("score", 0.0))
+                log_step(step=total_steps, action="submit", reward=obs.get("score", 0.0),
+                         done=True, error=None)
                 break
         else:
             undo_count = 0
 
-        # Stall detection — be more patient, some fixes need multiple steps
+        # Stall detection
         if abs(delta) < 0.001:
             stall_count += 1
         else:
             stall_count = 0
 
         if stall_count >= 5 and current_score > 0.3:
-            print(f"  -> Stalled for {stall_count} steps, submitting...")
             obs = env_step({"action_type": "submit"})
+            total_steps += 1
+            rewards.append(obs.get("score", 0.0))
+            log_step(step=total_steps, action="submit", reward=obs.get("score", 0.0),
+                     done=True, error=None)
             break
 
         prev_score = current_score
@@ -299,26 +330,24 @@ def run_task(client: OpenAI, task_id: str, use_generate: bool = False,
             break
 
     final_score = obs.get("score", 0.0)
-    print(f"\n  Final score for {task_id}: {final_score:.4f}")
+    if not rewards:
+        rewards = [final_score]
 
-    try:
-        validation = env_validate()
-        remaining = validation.get("error_breakdown", {})
-        if remaining:
-            print(f"  Remaining errors: {remaining}")
-    except Exception:
-        pass
+    score = max(rewards) if rewards else 0.0
+    score = min(max(score, 0.0), 1.0)
+    success = score >= SUCCESS_THRESHOLD
+
+    log_end(success=success, steps=total_steps, score=score, rewards=rewards)
 
     return final_score
 
 
 def main():
-    print("Data Cleaning Agent v2.0 — Smart Inference")
-    print(f"  API: {API_BASE_URL}")
-    print(f"  Model: {MODEL_NAME}")
-    print(f"  Key: {'***' + API_KEY[-4:] if API_KEY else 'NONE'}")
-    print(f"  Environment: {ENV_URL}")
-    print()
+    print(f"Data Cleaning Agent v2.0", flush=True)
+    print(f"  API: {API_BASE_URL}", flush=True)
+    print(f"  Model: {MODEL_NAME}", flush=True)
+    print(f"  Environment: {ENV_URL}", flush=True)
+    print(flush=True)
 
     client = get_openai_client()
     scores = {}
@@ -328,7 +357,7 @@ def main():
             score = run_task(client, task_id)
             scores[task_id] = score
         except Exception as e:
-            print(f"  ERROR on {task_id}: {e}")
+            print(f"  ERROR on {task_id}: {e}", flush=True)
             scores[task_id] = 0.0
 
     try:
@@ -337,21 +366,15 @@ def main():
                          use_generate=True, gen_config=gen_config)
         scores["generated_medium_30r"] = score
     except Exception as e:
-        print(f"  ERROR on generated task: {e}")
+        print(f"  ERROR on generated task: {e}", flush=True)
         scores["generated_medium_30r"] = 0.0
 
-    print(f"\n{'='*60}")
-    print("RESULTS SUMMARY")
-    print(f"{'='*60}")
-    for task_id, score in scores.items():
-        bar = "#" * int(score * 30)
-        print(f"  {task_id:30s} {score:.4f} |{bar}")
     avg = sum(scores.values()) / len(scores) if scores else 0
-    print(f"\n  Average score: {avg:.4f}")
+    print(f"\nAverage score: {avg:.4f}", flush=True)
 
     with open("results.json", "w") as f:
         json.dump({"scores": scores, "average": avg, "version": "2.0"}, f, indent=2)
-    print("\nResults saved to results.json")
+    print("Results saved to results.json", flush=True)
 
 
 if __name__ == "__main__":

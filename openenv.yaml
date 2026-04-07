@@ -1,4 +1,9 @@
+spec_version: 1
 name: data-cleaning-agent
+type: space
+runtime: fastapi
+app: server.app:app
+port: 7860
 description: >
   A production-grade data cleaning and validation environment where AI agents
   learn to detect and fix errors in messy tabular datasets. Features dynamic
