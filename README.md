@@ -42,19 +42,19 @@ VeriGen AI ships with a full Bloomberg/Grafana-style interactive terminal dashbo
 ### Setup Screen
 > Choose your LLM provider (Gemini, OpenAI, Anthropic, Grok), enter your API key, select a model, and optionally load your own CSV.
 
-![Dashboard Setup](assets/dashboard-setup.png)
+![Dashboard Setup](https://raw.githubusercontent.com/ayushap18/VeriGen-AI/b9ed83d/assets/dashboard-setup.png)
 
 ### Live Run Dashboard
 > Watch the agent clean data in real-time — score trends, action logs, token costs, error breakdowns, task progress, performance metrics, and an interactive agent chat.
 
-![Dashboard Run](assets/dashboard-run.png)
+![Dashboard Run](https://raw.githubusercontent.com/ayushap18/VeriGen-AI/b9ed83d/assets/dashboard-run.png)
 
-![Dashboard Run Detail](assets/dashboard-run2.png)
+![Dashboard Run Detail](https://raw.githubusercontent.com/ayushap18/VeriGen-AI/b9ed83d/assets/dashboard-run2.png)
 
 ### Summary Screen
 > Final scores per task, run history across models, total cost, and average performance.
 
-![Dashboard Summary](assets/dashboard-summary.png)
+![Dashboard Summary](https://raw.githubusercontent.com/ayushap18/VeriGen-AI/b9ed83d/assets/dashboard-summary.png)
 
 ### Dashboard Features
 
