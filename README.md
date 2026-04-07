@@ -204,6 +204,26 @@ python cli.py
 
 ---
 
+## Observation Space
+
+Each `step()` and `reset()` call returns an observation with these fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `dataset_csv` | string | Current state of the dataset as a CSV string |
+| `num_rows` | int | Number of rows in the current dataset |
+| `num_columns` | int | Number of columns |
+| `column_names` | list[str] | List of column names |
+| `column_types` | dict | Expected types for each column (string, integer, float, date_yyyy_mm_dd, boolean, category) |
+| `step_number` | int | Current step number |
+| `max_steps` | int | Maximum allowed steps for this task |
+| `last_action_success` | bool | Whether the last action succeeded |
+| `last_action_message` | string | Feedback message from the last action |
+| `score` | float | Current score (0.0–1.0) against ground truth |
+| `done` | bool | Whether the episode is finished |
+
+---
+
 ## Scoring
 
 Score is computed as a weighted combination against ground truth:
