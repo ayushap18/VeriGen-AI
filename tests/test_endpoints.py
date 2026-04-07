@@ -17,7 +17,7 @@ def test_health_endpoint():
 def test_root_endpoint():
     r = client.get("/")
     assert r.status_code == 200
-    assert "available_tasks" in r.json()
+    assert "VeriGen AI" in r.text
 
 
 def test_reset_empty_body():
